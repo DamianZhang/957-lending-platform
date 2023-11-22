@@ -17,9 +17,10 @@
 !README.md
 !LICENSE
 
-# !Makefile
+!Makefile
 !*.sql
 !*.yaml
+!*.yml
 
 # ...even if they are in subdirectories
 !*/

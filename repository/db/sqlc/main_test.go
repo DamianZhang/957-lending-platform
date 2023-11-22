@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const dbSource = "postgresql://admin:admin@localhost:5432/957-lending-platform?sslmode=disable"
+const dbSource = "postgresql://root:secret@localhost:5432/957-lending-platform?sslmode=disable"
 
 var testRepository Repository
 
