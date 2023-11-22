@@ -18,6 +18,8 @@
 !LICENSE
 
 # !Makefile
+!*.sql
+!*.yaml
 
 # ...even if they are in subdirectories
 !*/
