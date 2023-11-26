@@ -3,23 +3,23 @@ package impl
 import (
 	"context"
 
-	db "github.com/DamianZhang/957-lending-platform/repository/db/sqlc"
+	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
 
-func NewBorrowerServiceImpl(borrowerRepository db.Repository) service.BorrowerService {
+func NewBorrowerServiceImpl(borrowerStore db.Store) service.BorrowerService {
 	return &borrowerServiceImpl{
-		validate:           validator.New(),
-		borrowerRepository: borrowerRepository,
+		validate:      validator.New(),
+		borrowerStore: borrowerStore,
 	}
 }
 
 type borrowerServiceImpl struct {
-	validate           *validator.Validate
-	borrowerRepository db.Repository
+	validate      *validator.Validate
+	borrowerStore db.Store
 }
 
 func (svc *borrowerServiceImpl) SignUp(ctx context.Context, req *service.SignUpRequest) (*service.SignUpResponse, error) {
@@ -33,7 +33,7 @@ func (svc *borrowerServiceImpl) SignUp(ctx context.Context, req *service.SignUpR
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
-	borrower, err := svc.borrowerRepository.CreateUser(ctx, db.CreateUserParams{
+	borrower, err := svc.borrowerStore.CreateUser(ctx, db.CreateUserParams{
 		ID:             uuid.New(),
 		Email:          req.Email,
 		HashedPassword: hashedPassword,

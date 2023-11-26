@@ -1,4 +1,4 @@
-MIGRATE_PATH=repository/db/migration
+MIGRATE_PATH=db/migration
 DB_SOURCE=postgresql://root:secret@localhost:5432/957-lending-platform?sslmode=disable
 
 postgres:

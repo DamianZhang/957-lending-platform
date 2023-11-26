@@ -24,7 +24,7 @@ func createRandomUser(t *testing.T) User {
 		Role:           util.RandomRole(),
 	}
 
-	got, err := testRepository.CreateUser(context.Background(), wanted)
+	got, err := testStore.CreateUser(context.Background(), wanted)
 	require.NoError(t, err)
 	require.NotEmpty(t, got)
 
@@ -47,7 +47,7 @@ func TestCreateUser(t *testing.T) {
 
 func TestGetUserByEmail(t *testing.T) {
 	wanted := createRandomUser(t)
-	got, err := testRepository.GetUserByEmail(context.Background(), wanted.Email)
+	got, err := testStore.GetUserByEmail(context.Background(), wanted.Email)
 	require.NoError(t, err)
 	require.NotEmpty(t, got)
 
@@ -68,7 +68,7 @@ func TestGetUsers(t *testing.T) {
 		createRandomUser(t)
 	}
 
-	users, err := testRepository.GetUsers(context.Background(), GetUsersParams{
+	users, err := testStore.GetUsers(context.Background(), GetUsersParams{
 		Limit:  int32(wanted),
 		Offset: 0,
 	})
@@ -87,7 +87,7 @@ func TestUpdateUserByEmailOnlyHashedPassword(t *testing.T) {
 	newHashedPassword, err := util.HashPassword(util.RandomString(6))
 	require.NoError(t, err)
 
-	updatedUser, err := testRepository.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
+	updatedUser, err := testStore.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
 		Email:     oldUser.Email,
 		UpdatedAt: newUpdatedAt,
 		HashedPassword: pgtype.Text{
@@ -118,7 +118,7 @@ func TestUpdateUserByEmailOnlyIsEmailVerified(t *testing.T) {
 	newUpdatedAt := time.Now()
 	newIsEmailVerified := true
 
-	updatedUser, err := testRepository.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
+	updatedUser, err := testStore.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
 		Email:     oldUser.Email,
 		UpdatedAt: newUpdatedAt,
 		IsEmailVerified: pgtype.Bool{
@@ -153,7 +153,7 @@ func TestUpdateUserByEmailAllFields(t *testing.T) {
 	newNickname := util.RandomString(6)
 	newIsEmailVerified := true
 
-	updatedUser, err := testRepository.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
+	updatedUser, err := testStore.UpdateUserByEmail(context.Background(), UpdateUserByEmailParams{
 		Email:     oldUser.Email,
 		UpdatedAt: newUpdatedAt,
 		HashedPassword: pgtype.Text{

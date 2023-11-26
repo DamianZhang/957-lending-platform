@@ -10,12 +10,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-var testRepository Repository
+var testStore Store
 
 func TestMain(m *testing.M) {
 	config, err := util.LoadConfig("../../..")
 	if err != nil {
-		log.Fatal("cannot load config:", err)
+		log.Fatal("can not load config:", err)
 	}
 
 	connPool, err := pgxpool.New(context.Background(), config.DBSource)
@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("can not connect to db:", err)
 	}
 
-	testRepository = NewRepository(connPool)
+	testStore = NewStore(connPool)
 
 	os.Exit(m.Run())
 }
