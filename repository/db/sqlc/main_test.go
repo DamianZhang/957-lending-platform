@@ -6,15 +6,19 @@ import (
 	"os"
 	"testing"
 
+	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
-
-const dbSource = "postgresql://root:secret@localhost:5432/957-lending-platform?sslmode=disable"
 
 var testRepository Repository
 
 func TestMain(m *testing.M) {
-	connPool, err := pgxpool.New(context.Background(), dbSource)
+	config, err := util.LoadConfig("../../..")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
+	connPool, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Fatal("can not connect to db:", err)
 	}

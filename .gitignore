@@ -21,6 +21,7 @@
 !*.sql
 !*.yaml
 !*.yml
+!*.env
 
 # ...even if they are in subdirectories
 !*/
