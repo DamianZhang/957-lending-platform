@@ -28,4 +28,7 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: postgres access_postgres new_migration migrate_up migrate_up_1 migrate_down migrate_down_1 sqlc test
+server:
+	go run main.go
+
+.PHONY: postgres access_postgres new_migration migrate_up migrate_up_1 migrate_down migrate_down_1 sqlc test server
