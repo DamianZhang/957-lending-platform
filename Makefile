@@ -28,10 +28,13 @@ sqlc:
 mock_db: sqlc
 	mockgen -package mockdb -destination db/mock/store.go github.com/DamianZhang/957-lending-platform/db/sqlc Store
 
+mock_svc:
+	mockgen -package mocksvc -destination service/mock/borrower_service.go github.com/DamianZhang/957-lending-platform/service BorrowerService
+
 test:
 	go clean -testcache | go test -v -cover ./...
 
 server:
 	go run main.go
 
-.PHONY: postgres access_postgres new_migration migrate_up migrate_up_1 migrate_down migrate_down_1 sqlc mock_db test server
+.PHONY: postgres access_postgres new_migration migrate_up migrate_up_1 migrate_down migrate_down_1 sqlc mock_db mock_svc test server

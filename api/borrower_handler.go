@@ -41,7 +41,5 @@ func (handler *BorrowerHandler) SignUp(ctx *fiber.Ctx) error {
 		})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(GeneralResponse{
-		Data: rsp,
-	})
+	return ctx.Status(fiber.StatusCreated).JSON(rsp)
 }
