@@ -8,7 +8,7 @@ import (
 
 type SignUpRequest struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6,max=30"`
+	Password string `json:"password" validate:"required,min=6"`
 	LineID   string `json:"line_id" validate:"required,min=1,max=20"`
 	Nickname string `json:"nickname" validate:"required,alphanum,min=1,max=20"`
 }

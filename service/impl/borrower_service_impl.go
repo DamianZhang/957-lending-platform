@@ -33,14 +33,17 @@ func (svc *borrowerServiceImpl) SignUp(ctx context.Context, req *service.SignUpR
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
-	borrower, err := svc.borrowerStore.CreateUser(ctx, db.CreateUserParams{
-		ID:             uuid.New(),
-		Email:          req.Email,
+	arg := db.CreateUserParams{
+		Email:    req.Email,
+		LineID:   req.LineID,
+		Nickname: req.Nickname,
+
 		HashedPassword: hashedPassword,
-		LineID:         req.LineID,
-		Nickname:       req.Nickname,
+		ID:             uuid.New(),
 		Role:           util.BorrowerRole,
-	})
+	}
+
+	borrower, err := svc.borrowerStore.CreateUser(ctx, arg)
 	if err != nil {
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
