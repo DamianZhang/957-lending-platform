@@ -36,10 +36,10 @@ func (m *MockBorrowerService) EXPECT() *MockBorrowerServiceMockRecorder {
 }
 
 // SignUp mocks base method.
-func (m *MockBorrowerService) SignUp(arg0 context.Context, arg1 *service.SignUpRequest) (*service.SignUpResponse, error) {
+func (m *MockBorrowerService) SignUp(arg0 context.Context, arg1 *service.SignUpInput) (*service.SignUpOutput, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignUp", arg0, arg1)
-	ret0, _ := ret[0].(*service.SignUpResponse)
+	ret0, _ := ret[0].(*service.SignUpOutput)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

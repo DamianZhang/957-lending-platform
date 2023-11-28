@@ -6,40 +6,30 @@ import (
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/util"
-	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 )
 
 func NewBorrowerServiceImpl(borrowerStore db.Store) service.BorrowerService {
 	return &borrowerServiceImpl{
-		validate:      validator.New(),
 		borrowerStore: borrowerStore,
 	}
 }
 
 type borrowerServiceImpl struct {
-	validate      *validator.Validate
 	borrowerStore db.Store
 }
 
-func (svc *borrowerServiceImpl) SignUp(ctx context.Context, req *service.SignUpRequest) (*service.SignUpResponse, error) {
-	err := svc.validate.Struct(req)
-	if err != nil {
-		return nil, service.NewError(service.ErrBadRequest, err)
-	}
-
-	hashedPassword, err := util.HashPassword(req.Password)
+func (svc *borrowerServiceImpl) SignUp(ctx context.Context, input *service.SignUpInput) (*service.SignUpOutput, error) {
+	hashedPassword, err := util.HashPassword(input.Password)
 	if err != nil {
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
 	arg := db.CreateUserParams{
-		Email:    req.Email,
-		LineID:   req.LineID,
-		Nickname: req.Nickname,
+		Email:    input.Email,
+		LineID:   input.LineID,
+		Nickname: input.Nickname,
 
 		HashedPassword: hashedPassword,
-		ID:             uuid.New(),
 		Role:           util.BorrowerRole,
 	}
 
@@ -48,12 +38,8 @@ func (svc *borrowerServiceImpl) SignUp(ctx context.Context, req *service.SignUpR
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
-	rsp := &service.SignUpResponse{
-		ID:       borrower.ID,
-		Email:    borrower.Email,
-		LineID:   borrower.LineID,
-		Nickname: borrower.Nickname,
-		Role:     borrower.Role,
+	output := &service.SignUpOutput{
+		Borrower: borrower,
 	}
-	return rsp, nil
+	return output, nil
 }

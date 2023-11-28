@@ -12,7 +12,6 @@ import (
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/golang/mock/gomock"
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,17 +31,7 @@ func (e eqCreateUserParamsMatcher) Matches(x interface{}) bool {
 		return false
 	}
 
-	if gotArg.ID.String() == "00000000-0000-0000-0000-000000000000" {
-		return false
-	}
-
-	if gotArg.Role != util.BorrowerRole {
-		return false
-	}
-
 	e.arg.HashedPassword = gotArg.HashedPassword
-	e.arg.ID = gotArg.ID
-	e.arg.Role = gotArg.Role
 	return reflect.DeepEqual(e.arg, gotArg)
 }
 
@@ -55,17 +44,17 @@ func EqCreateUserParams(arg db.CreateUserParams, password string) gomock.Matcher
 }
 
 func TestSignUp(t *testing.T) {
-	borrower, password := randomBorrower(t)
+	borrower, password := expectedBorrower(t)
 
 	testCases := []struct {
 		name        string
-		input       *service.SignUpRequest
+		input       *service.SignUpInput
 		buildStubs  func(store *mockdb.MockStore)
-		checkOutput func(rsp *service.SignUpResponse, err error)
+		checkOutput func(output *service.SignUpOutput, err error)
 	}{
 		{
 			name: "OK",
-			input: &service.SignUpRequest{
+			input: &service.SignUpInput{
 				Email:    borrower.Email,
 				Password: password,
 				LineID:   borrower.LineID,
@@ -76,40 +65,23 @@ func TestSignUp(t *testing.T) {
 					Email:    borrower.Email,
 					LineID:   borrower.LineID,
 					Nickname: borrower.Nickname,
+
+					HashedPassword: borrower.HashedPassword,
+					Role:           borrower.Role,
 				}
 				store.EXPECT().
 					CreateUser(gomock.Any(), EqCreateUserParams(arg, password)).
 					Times(1).
 					Return(borrower, nil)
 			},
-			checkOutput: func(rsp *service.SignUpResponse, err error) {
+			checkOutput: func(output *service.SignUpOutput, err error) {
 				require.NoError(t, err)
-				requireRspMatchBorrower(t, rsp, borrower)
-			},
-		},
-		{
-			name: "InvalidEmail",
-			input: &service.SignUpRequest{
-				Email:    "invalid-email",
-				Password: password,
-				LineID:   borrower.LineID,
-				Nickname: borrower.Nickname,
-			},
-			buildStubs: func(store *mockdb.MockStore) {
-				store.EXPECT().
-					CreateUser(gomock.Any(), gomock.Any()).
-					Times(0)
-			},
-			checkOutput: func(rsp *service.SignUpResponse, err error) {
-				var svcError service.Error
-				require.ErrorAs(t, err, &svcError)
-				require.ErrorIs(t, svcError.SvcErr(), service.ErrBadRequest)
-				require.Nil(t, rsp)
+				require.Equal(t, borrower, output.Borrower)
 			},
 		},
 		{
 			name: "TooLongPassword",
-			input: &service.SignUpRequest{
+			input: &service.SignUpInput{
 				Email:    borrower.Email,
 				Password: "01234567890123456789012345678901234567890123456789012345678901234567890123456789",
 				LineID:   borrower.LineID,
@@ -120,16 +92,16 @@ func TestSignUp(t *testing.T) {
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
-			checkOutput: func(rsp *service.SignUpResponse, err error) {
+			checkOutput: func(output *service.SignUpOutput, err error) {
 				var svcError service.Error
 				require.ErrorAs(t, err, &svcError)
 				require.ErrorIs(t, svcError.SvcErr(), service.ErrInternalFailure)
-				require.Nil(t, rsp)
+				require.Nil(t, output)
 			},
 		},
 		{
-			name: "InternalError",
-			input: &service.SignUpRequest{
+			name: "DBErrConnDone",
+			input: &service.SignUpInput{
 				Email:    borrower.Email,
 				Password: password,
 				LineID:   borrower.LineID,
@@ -141,11 +113,11 @@ func TestSignUp(t *testing.T) {
 					Times(1).
 					Return(db.User{}, sql.ErrConnDone)
 			},
-			checkOutput: func(rsp *service.SignUpResponse, err error) {
+			checkOutput: func(output *service.SignUpOutput, err error) {
 				var svcError service.Error
 				require.ErrorAs(t, err, &svcError)
 				require.ErrorIs(t, svcError.SvcErr(), service.ErrInternalFailure)
-				require.Nil(t, rsp)
+				require.Nil(t, output)
 			},
 		},
 	}
@@ -160,13 +132,13 @@ func TestSignUp(t *testing.T) {
 
 			borrowerService := NewBorrowerServiceImpl(store)
 
-			rsp, err := borrowerService.SignUp(context.Background(), tc.input)
-			tc.checkOutput(rsp, err)
+			output, err := borrowerService.SignUp(context.Background(), tc.input)
+			tc.checkOutput(output, err)
 		})
 	}
 }
 
-func randomBorrower(t *testing.T) (borrower db.User, password string) {
+func expectedBorrower(t *testing.T) (borrower db.User, password string) {
 	password = util.RandomString(6)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
@@ -177,17 +149,7 @@ func randomBorrower(t *testing.T) (borrower db.User, password string) {
 		Nickname: util.RandomString(6),
 
 		HashedPassword: hashedPassword,
-		ID:             uuid.New(),
 		Role:           util.BorrowerRole,
 	}
 	return
-}
-
-func requireRspMatchBorrower(t *testing.T, rsp *service.SignUpResponse, borrower db.User) {
-	require.Equal(t, borrower.Email, rsp.Email)
-	require.Equal(t, borrower.LineID, rsp.LineID)
-	require.Equal(t, borrower.Nickname, rsp.Nickname)
-
-	require.Equal(t, borrower.ID, rsp.ID)
-	require.Equal(t, borrower.Role, rsp.Role)
 }

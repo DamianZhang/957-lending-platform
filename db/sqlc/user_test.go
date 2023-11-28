@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/DamianZhang/957-lending-platform/util"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +15,6 @@ func createRandomUser(t *testing.T) User {
 	require.NoError(t, err)
 
 	wanted := CreateUserParams{
-		ID:             uuid.New(),
 		Email:          util.RandomEmail(),
 		HashedPassword: hashedPassword,
 		LineID:         util.RandomString(6),
@@ -28,13 +26,13 @@ func createRandomUser(t *testing.T) User {
 	require.NoError(t, err)
 	require.NotEmpty(t, got)
 
-	require.Equal(t, wanted.ID, got.ID)
 	require.Equal(t, wanted.Email, got.Email)
 	require.Equal(t, wanted.HashedPassword, got.HashedPassword)
 	require.Equal(t, wanted.LineID, got.LineID)
 	require.Equal(t, wanted.Nickname, got.Nickname)
 	require.Equal(t, wanted.Role, got.Role)
 	require.False(t, got.IsEmailVerified)
+	require.NotZero(t, got.ID)
 	require.NotZero(t, got.CreatedAt)
 	require.NotZero(t, got.UpdatedAt)
 
