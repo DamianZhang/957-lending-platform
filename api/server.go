@@ -7,8 +7,8 @@ import (
 
 // Server serves HTTP requests for our lending platform
 type Server struct {
-	borrowerService service.BorrowerService
 	app             *fiber.App
+	borrowerService service.BorrowerService
 }
 
 // NewServer creates a new HTTP server and set up routing
@@ -34,13 +34,3 @@ func (server *Server) setUpRoutes() {
 func (server *Server) Start(address string) error {
 	return server.app.Listen(address)
 }
-
-type (
-	ErrorResponse struct {
-		Message string `json:"message"`
-	}
-
-	GeneralResponse struct {
-		Data interface{} `json:"data"`
-	}
-)

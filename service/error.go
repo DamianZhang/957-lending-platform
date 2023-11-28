@@ -4,7 +4,6 @@ import "errors"
 
 // Service errors
 var (
-	ErrBadRequest      = errors.New("bad request")
 	ErrInternalFailure = errors.New("internal failure")
 )
 
@@ -22,10 +21,6 @@ func NewError(svcErr, appErr error) error {
 
 func (e Error) SvcErr() error {
 	return e.svcErr
-}
-
-func (e Error) AppErr() error {
-	return e.appErr
 }
 
 func (e Error) Error() string {
