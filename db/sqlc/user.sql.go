@@ -9,35 +9,31 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO "users" (
-  "id",
   "email",
   "hashed_password",
   "line_id",
   "nickname",
   "role"
 ) VALUES (
-  $1, $2, $3, $4, $5, $6
+  $1, $2, $3, $4, $5
 ) RETURNING id, created_at, updated_at, email, hashed_password, line_id, nickname, is_email_verified, role
 `
 
 type CreateUserParams struct {
-	ID             uuid.UUID `json:"id"`
-	Email          string    `json:"email"`
-	HashedPassword string    `json:"hashed_password"`
-	LineID         string    `json:"line_id"`
-	Nickname       string    `json:"nickname"`
-	Role           string    `json:"role"`
+	Email          string `json:"email"`
+	HashedPassword string `json:"hashed_password"`
+	LineID         string `json:"line_id"`
+	Nickname       string `json:"nickname"`
+	Role           string `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
 	row := q.db.QueryRow(ctx, createUser,
-		arg.ID,
 		arg.Email,
 		arg.HashedPassword,
 		arg.LineID,
