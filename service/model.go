@@ -14,3 +14,12 @@ type SignUpInput struct {
 type SignUpOutput struct {
 	Borrower db.User `json:"borrower"`
 }
+
+type SignInInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type SignInOutput struct {
+	Borrower db.User `json:"borrower"`
+}

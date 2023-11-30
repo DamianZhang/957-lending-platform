@@ -2,14 +2,12 @@ package token
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
+	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
-
-const minSecretKeySize = 32
 
 // JWTMaker is a JSON Web Token maker
 type JWTMaker struct {
@@ -17,12 +15,10 @@ type JWTMaker struct {
 }
 
 // NewJWTMaker creates a new JWTMaker
-func NewJWTMaker(secretKey string) (Maker, error) {
-	if len(secretKey) < minSecretKeySize {
-		return nil, fmt.Errorf("invalid key size: must be at least %d characters", minSecretKeySize)
+func NewJWTMaker() Maker {
+	return &JWTMaker{
+		secretKey: util.RandomString(32),
 	}
-
-	return &JWTMaker{secretKey: secretKey}, nil
 }
 
 type MyCustomClaims struct {

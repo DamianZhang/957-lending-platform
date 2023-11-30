@@ -21,6 +21,8 @@ func FromServiceError(err error) APIError {
 		switch svcError.SvcErr() {
 		case service.ErrInternalFailure:
 			apiError.StatusCode = fiber.StatusInternalServerError
+		case service.ErrUnauthorized:
+			apiError.StatusCode = fiber.StatusUnauthorized
 		}
 
 		apiError.Message = svcError.Error()

@@ -5,6 +5,7 @@ import "errors"
 // Service errors
 var (
 	ErrInternalFailure = errors.New("internal failure")
+	ErrUnauthorized    = errors.New("unauthorized")
 )
 
 type Error struct {

@@ -29,10 +29,7 @@ func main() {
 	borrowerService := service.NewBorrowerServiceImpl(store)
 
 	// create server
-	server, err := api.NewServer(borrowerService)
-	if err != nil {
-		log.Fatal("can not create server:", err)
-	}
+	server := api.NewServer(config, borrowerService)
 
 	// start server
 	err = server.Start(config.HTTPServerAddress)

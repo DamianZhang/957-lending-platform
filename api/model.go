@@ -17,3 +17,12 @@ type SignUpResponse struct {
 	Nickname string `json:"nickname"`
 	Role     string `json:"role"`
 }
+
+type SignInRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+type SignInResponse struct {
+	RefreshToken string `json:"refresh_token"`
+}

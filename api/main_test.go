@@ -2,14 +2,18 @@ package api
 
 import (
 	"testing"
+	"time"
 
 	"github.com/DamianZhang/957-lending-platform/service"
-	"github.com/stretchr/testify/require"
+	"github.com/DamianZhang/957-lending-platform/util"
 )
 
 func newTestServer(t *testing.T, borrowerService service.BorrowerService) *Server {
-	server, err := NewServer(borrowerService)
-	require.NoError(t, err)
+	config := util.Config{
+		RefreshTokenDuration: time.Minute,
+	}
+
+	server := NewServer(config, borrowerService)
 
 	return server
 }

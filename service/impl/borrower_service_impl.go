@@ -43,3 +43,20 @@ func (svc *borrowerServiceImpl) SignUp(ctx context.Context, input *service.SignU
 	}
 	return output, nil
 }
+
+func (svc *borrowerServiceImpl) SignIn(ctx context.Context, input *service.SignInInput) (*service.SignInOutput, error) {
+	borrower, err := svc.borrowerStore.GetUserByEmail(ctx, input.Email)
+	if err != nil {
+		return nil, service.NewError(service.ErrUnauthorized, err)
+	}
+
+	err = util.CheckPassword(borrower.HashedPassword, input.Password)
+	if err != nil {
+		return nil, service.NewError(service.ErrUnauthorized, err)
+	}
+
+	output := &service.SignInOutput{
+		Borrower: borrower,
+	}
+	return output, nil
+}

@@ -35,6 +35,21 @@ func (m *MockBorrowerService) EXPECT() *MockBorrowerServiceMockRecorder {
 	return m.recorder
 }
 
+// SignIn mocks base method.
+func (m *MockBorrowerService) SignIn(arg0 context.Context, arg1 *service.SignInInput) (*service.SignInOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SignIn", arg0, arg1)
+	ret0, _ := ret[0].(*service.SignInOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SignIn indicates an expected call of SignIn.
+func (mr *MockBorrowerServiceMockRecorder) SignIn(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignIn", reflect.TypeOf((*MockBorrowerService)(nil).SignIn), arg0, arg1)
+}
+
 // SignUp mocks base method.
 func (m *MockBorrowerService) SignUp(arg0 context.Context, arg1 *service.SignUpInput) (*service.SignUpOutput, error) {
 	m.ctrl.T.Helper()
