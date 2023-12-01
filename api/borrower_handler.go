@@ -30,6 +30,7 @@ func (handler *BorrowerHandler) Route(app *fiber.App) {
 	router := app.Group("/api/v1/borrowers")
 	router.Post("/sign_up", handler.SignUp)
 	router.Post("/sign_in", handler.SignIn)
+	router.Get("/refresh_token", handler.RefreshToken)
 }
 
 func (handler *BorrowerHandler) SignUp(ctx *fiber.Ctx) error {
@@ -102,8 +103,50 @@ func (handler *BorrowerHandler) SignIn(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
 	}
 
+	cookie := &fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Expires:  payload.ExpiresAt,
+		HTTPOnly: true,
+	}
+	ctx.Cookie(cookie)
+
 	rsp := SignInResponse{
 		RefreshToken: refreshToken,
+	}
+	return ctx.Status(fiber.StatusOK).JSON(rsp)
+}
+
+func (handler *BorrowerHandler) RefreshToken(ctx *fiber.Ctx) error {
+	refreshToken := ctx.Cookies("refresh_token")
+
+	payload, err := handler.tokenMaker.VerifyToken(refreshToken)
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to verify refresh token: %s", err.Error())
+		return errorResponse(ctx, fiber.StatusUnauthorized, errMsg)
+	}
+
+	input := &service.RefreshTokenInput{
+		SessionID: payload.ID.String(),
+	}
+
+	_, err = handler.borrowerService.RefreshToken(ctx.Context(), input)
+	if err != nil {
+		apiError := FromServiceError(err)
+		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
+	}
+
+	accessToken, _, err := handler.tokenMaker.CreateToken(
+		payload.Email,
+		handler.config.AccessTokenDuration,
+	)
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to create access token: %s", err.Error())
+		return errorResponse(ctx, fiber.StatusUnauthorized, errMsg)
+	}
+
+	rsp := RefreshTokenResponse{
+		AccessToken: accessToken,
 	}
 	return ctx.Status(fiber.StatusOK).JSON(rsp)
 }

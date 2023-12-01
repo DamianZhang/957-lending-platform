@@ -74,3 +74,15 @@ func (svc *borrowerServiceImpl) SignIn(ctx context.Context, input *service.SignI
 	}
 	return output, nil
 }
+
+func (svc *borrowerServiceImpl) RefreshToken(ctx context.Context, input *service.RefreshTokenInput) (*service.RefreshTokenOutput, error) {
+	session, err := svc.borrowerCacher.GetSessionByID(ctx, input.SessionID)
+	if err != nil || session.IsBlocked {
+		return nil, service.NewError(service.ErrUnauthorized, err)
+	}
+
+	output := &service.RefreshTokenOutput{
+		Session: session,
+	}
+	return output, nil
+}

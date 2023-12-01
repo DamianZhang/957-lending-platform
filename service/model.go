@@ -3,6 +3,7 @@ package service
 import (
 	"time"
 
+	"github.com/DamianZhang/957-lending-platform/cache"
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
 )
 
@@ -26,4 +27,12 @@ type SignInInput struct {
 
 type SignInOutput struct {
 	Borrower db.User `json:"borrower"`
+}
+
+type RefreshTokenInput struct {
+	SessionID string `json:"session_id"`
+}
+
+type RefreshTokenOutput struct {
+	Session cache.Session `json:"session"`
 }

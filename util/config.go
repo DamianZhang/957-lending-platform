@@ -14,6 +14,7 @@ type Config struct {
 	RedisPassword        string        `mapstructure:"REDIS_PASSWORD"`
 	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 }
 
 // LoadConfig reads configuration from a config file or environment variables
