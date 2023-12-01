@@ -3,19 +3,22 @@ package impl
 import (
 	"context"
 
+	"github.com/DamianZhang/957-lending-platform/cache"
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/util"
 )
 
-func NewBorrowerServiceImpl(borrowerStore db.Store) service.BorrowerService {
+func NewBorrowerServiceImpl(borrowerStore db.Store, borrowerCacher cache.Cacher) service.BorrowerService {
 	return &borrowerServiceImpl{
-		borrowerStore: borrowerStore,
+		borrowerStore:  borrowerStore,
+		borrowerCacher: borrowerCacher,
 	}
 }
 
 type borrowerServiceImpl struct {
-	borrowerStore db.Store
+	borrowerStore  db.Store
+	borrowerCacher cache.Cacher
 }
 
 func (svc *borrowerServiceImpl) SignUp(ctx context.Context, input *service.SignUpInput) (*service.SignUpOutput, error) {

@@ -130,7 +130,7 @@ func TestSignUp(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			borrowerService := NewBorrowerServiceImpl(store)
+			borrowerService := NewBorrowerServiceImpl(store, nil)
 
 			output, err := borrowerService.SignUp(context.Background(), tc.input)
 			tc.checkOutput(output, err)

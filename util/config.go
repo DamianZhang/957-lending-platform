@@ -10,6 +10,8 @@ import (
 // The values are read by viper from a config file or environment variables
 type Config struct {
 	DBSource             string        `mapstructure:"DB_SOURCE"`
+	RedisAddress         string        `mapstructure:"REDIS_ADDRESS"`
+	RedisPassword        string        `mapstructure:"REDIS_PASSWORD"`
 	HTTPServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 }
