@@ -38,7 +38,7 @@ func (maker *JWTMaker) CreateToken(email string, duration time.Duration) (string
 		ID:    payload.ID,
 		Email: payload.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(payload.ExpiredAt),
+			ExpiresAt: jwt.NewNumericDate(payload.ExpiresAt),
 			IssuedAt:  jwt.NewNumericDate(payload.IssuedAt),
 			NotBefore: jwt.NewNumericDate(payload.IssuedAt),
 		},
@@ -79,7 +79,7 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 		ID:        claims.ID,
 		Email:     claims.Email,
 		IssuedAt:  claims.IssuedAt.Time,
-		ExpiredAt: claims.ExpiresAt.Time,
+		ExpiresAt: claims.ExpiresAt.Time,
 	}
 	return payload, nil
 }

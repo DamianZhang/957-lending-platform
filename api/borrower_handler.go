@@ -93,7 +93,7 @@ func (handler *BorrowerHandler) SignIn(ctx *fiber.Ctx) error {
 		Email:     req.Email,
 		Password:  req.Password,
 		SessionID: payload.ID.String(),
-		ExpiresAt: payload.ExpiredAt,
+		ExpiresAt: payload.ExpiresAt,
 	}
 
 	_, err = handler.borrowerService.SignIn(ctx.Context(), input)

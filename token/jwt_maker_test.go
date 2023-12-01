@@ -16,7 +16,7 @@ func TestJWTMaker(t *testing.T) {
 	duration := time.Minute
 
 	issuedAt := time.Now()
-	expiredAt := issuedAt.Add(duration)
+	expiresAt := issuedAt.Add(duration)
 
 	token, payload, err := maker.CreateToken(email, duration)
 	require.NoError(t, err)
@@ -30,7 +30,7 @@ func TestJWTMaker(t *testing.T) {
 	require.NotZero(t, payload.ID)
 	require.Equal(t, email, payload.Email)
 	require.WithinDuration(t, issuedAt, payload.IssuedAt, time.Second)
-	require.WithinDuration(t, expiredAt, payload.ExpiredAt, time.Second)
+	require.WithinDuration(t, expiresAt, payload.ExpiresAt, time.Second)
 }
 
 func TestExpiredJWTToken(t *testing.T) {
@@ -55,7 +55,7 @@ func TestInvalidJWTTokenAlgNone(t *testing.T) {
 		ID:    fakePayload.ID,
 		Email: fakePayload.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(fakePayload.ExpiredAt),
+			ExpiresAt: jwt.NewNumericDate(fakePayload.ExpiresAt),
 			IssuedAt:  jwt.NewNumericDate(fakePayload.IssuedAt),
 			NotBefore: jwt.NewNumericDate(fakePayload.IssuedAt),
 		},

@@ -35,7 +35,7 @@ func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (str
 	token := paseto.NewToken()
 	token.SetString("id", payload.ID.String())
 	token.SetString("email", payload.Email)
-	token.SetExpiration(payload.ExpiredAt)
+	token.SetExpiration(payload.ExpiresAt)
 	token.SetIssuedAt(payload.IssuedAt)
 	token.SetNotBefore(payload.IssuedAt)
 
@@ -69,7 +69,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
-	expiredAt, err := parsedToken.GetExpiration()
+	expiresAt, err := parsedToken.GetExpiration()
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
@@ -78,7 +78,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 		ID:        uuid,
 		Email:     email,
 		IssuedAt:  issuedAt,
-		ExpiredAt: expiredAt,
+		ExpiresAt: expiresAt,
 	}
 	return payload, nil
 }
