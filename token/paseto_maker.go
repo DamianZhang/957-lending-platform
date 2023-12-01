@@ -26,10 +26,10 @@ func NewPasetoMaker() Maker {
 }
 
 // CreateToken creates a new token for a specific email and duration
-func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (string, error) {
+func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(email, duration)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	token := paseto.NewToken()
@@ -39,7 +39,7 @@ func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (str
 	token.SetIssuedAt(payload.IssuedAt)
 	token.SetNotBefore(payload.IssuedAt)
 
-	return token.V4Encrypt(maker.symmetricKey, nil), nil
+	return token.V4Encrypt(maker.symmetricKey, nil), payload, nil
 }
 
 // VerifyToken checks if the token is valid or not

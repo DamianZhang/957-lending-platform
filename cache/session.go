@@ -3,11 +3,13 @@ package cache
 import (
 	"context"
 	"strconv"
+	"time"
 )
 
 type CreateSessionParams struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
+	ID        string    `json:"id"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Email     string    `json:"email"`
 }
 
 func (cacher *RedisCacher) CreateSession(ctx context.Context, arg CreateSessionParams) (Session, error) {
@@ -17,6 +19,10 @@ func (cacher *RedisCacher) CreateSession(ctx context.Context, arg CreateSessionP
 	data["is_blocked"] = false
 
 	if err := cacher.HMSet(ctx, arg.ID, data).Err(); err != nil {
+		return Session{}, err
+	}
+
+	if err := cacher.ExpireAt(ctx, arg.ID, arg.ExpiresAt).Err(); err != nil {
 		return Session{}, err
 	}
 

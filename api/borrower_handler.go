@@ -80,24 +80,26 @@ func (handler *BorrowerHandler) SignIn(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusBadRequest, errMsg)
 	}
 
-	input := &service.SignInInput{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	output, err := handler.borrowerService.SignIn(ctx.Context(), input)
-	if err != nil {
-		apiError := FromServiceError(err)
-		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
-	}
-
-	refreshToken, err := handler.tokenMaker.CreateToken(
-		output.Borrower.Email,
+	refreshToken, payload, err := handler.tokenMaker.CreateToken(
+		req.Email,
 		handler.config.RefreshTokenDuration,
 	)
 	if err != nil {
 		errMsg := fmt.Sprintf("failed to create refresh token: %s", err.Error())
 		return errorResponse(ctx, fiber.StatusUnauthorized, errMsg)
+	}
+
+	input := &service.SignInInput{
+		Email:     req.Email,
+		Password:  req.Password,
+		SessionID: payload.ID.String(),
+		ExpiresAt: payload.ExpiredAt,
+	}
+
+	_, err = handler.borrowerService.SignIn(ctx.Context(), input)
+	if err != nil {
+		apiError := FromServiceError(err)
+		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
 	}
 
 	rsp := SignInResponse{

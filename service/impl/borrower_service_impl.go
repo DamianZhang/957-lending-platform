@@ -58,6 +58,17 @@ func (svc *borrowerServiceImpl) SignIn(ctx context.Context, input *service.SignI
 		return nil, service.NewError(service.ErrUnauthorized, err)
 	}
 
+	arg := cache.CreateSessionParams{
+		ID:        input.SessionID,
+		ExpiresAt: input.ExpiresAt,
+		Email:     input.Email,
+	}
+
+	_, err = svc.borrowerCacher.CreateSession(ctx, arg)
+	if err != nil {
+		return nil, service.NewError(service.ErrUnauthorized, err)
+	}
+
 	output := &service.SignInOutput{
 		Borrower: borrower,
 	}

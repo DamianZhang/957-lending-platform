@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
 )
 
@@ -16,8 +18,10 @@ type SignUpOutput struct {
 }
 
 type SignInInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email     string    `json:"email"`
+	Password  string    `json:"password"`
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 type SignInOutput struct {

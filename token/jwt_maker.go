@@ -28,10 +28,10 @@ type MyCustomClaims struct {
 }
 
 // CreateToken creates a new token for a specific email and duration
-func (maker *JWTMaker) CreateToken(email string, duration time.Duration) (string, error) {
+func (maker *JWTMaker) CreateToken(email string, duration time.Duration) (string, *Payload, error) {
 	payload, err := NewPayload(email, duration)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	claims := MyCustomClaims{
@@ -45,7 +45,8 @@ func (maker *JWTMaker) CreateToken(email string, duration time.Duration) (string
 	}
 	jwtToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return jwtToken.SignedString([]byte(maker.secretKey))
+	token, err := jwtToken.SignedString([]byte(maker.secretKey))
+	return token, payload, err
 }
 
 // VerifyToken checks if the token is valid or not

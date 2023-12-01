@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/stretchr/testify/require"
@@ -10,8 +11,9 @@ import (
 
 func createRandomSession(t *testing.T) Session {
 	expected := CreateSessionParams{
-		ID:    util.RandomString(10),
-		Email: util.RandomEmail(),
+		ID:        util.RandomString(10),
+		ExpiresAt: time.Now().Add(time.Minute),
+		Email:     util.RandomEmail(),
 	}
 
 	actual, err := testCacher.CreateSession(context.Background(), expected)
