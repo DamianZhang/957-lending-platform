@@ -31,7 +31,7 @@ func TestSignUpAPI(t *testing.T) {
 		reqBody      SignUpRequest
 		setReqHeader func(req *http.Request)
 		buildStubs   func(svc *mocksvc.MockBorrowerService)
-		checkRsp     func(rsp *http.Response)
+		checkRsp     func(t *testing.T, rsp *http.Response)
 	}{
 		{
 			name:    "OK",
@@ -59,7 +59,7 @@ func TestSignUpAPI(t *testing.T) {
 					Times(1).
 					Return(output, nil)
 			},
-			checkRsp: func(rsp *http.Response) {
+			checkRsp: func(t *testing.T, rsp *http.Response) {
 				require.Equal(t, fiber.StatusCreated, rsp.StatusCode)
 				requireRspMatchExpectedRsp(t, rsp, expectedRsp)
 			},
@@ -73,7 +73,7 @@ func TestSignUpAPI(t *testing.T) {
 					SignUp(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
-			checkRsp: func(rsp *http.Response) {
+			checkRsp: func(t *testing.T, rsp *http.Response) {
 				require.Equal(t, fiber.StatusBadRequest, rsp.StatusCode)
 			},
 		},
@@ -93,7 +93,7 @@ func TestSignUpAPI(t *testing.T) {
 					SignUp(gomock.Any(), gomock.Any()).
 					Times(0)
 			},
-			checkRsp: func(rsp *http.Response) {
+			checkRsp: func(t *testing.T, rsp *http.Response) {
 				require.Equal(t, fiber.StatusBadRequest, rsp.StatusCode)
 			},
 		},
@@ -109,7 +109,7 @@ func TestSignUpAPI(t *testing.T) {
 					Times(1).
 					Return(nil, service.NewError(service.ErrInternalFailure, nil))
 			},
-			checkRsp: func(rsp *http.Response) {
+			checkRsp: func(t *testing.T, rsp *http.Response) {
 				require.Equal(t, fiber.StatusInternalServerError, rsp.StatusCode)
 			},
 		},
@@ -129,12 +129,12 @@ func TestSignUpAPI(t *testing.T) {
 			require.NoError(t, err)
 
 			url := "/api/v1/borrowers/sign_up"
-			request := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(data))
-			tc.setReqHeader(request)
+			req := httptest.NewRequest(http.MethodPost, url, bytes.NewReader(data))
+			tc.setReqHeader(req)
 
-			rsp, err := server.app.Test(request)
+			rsp, err := server.app.Test(req)
 			require.NoError(t, err)
-			tc.checkRsp(rsp)
+			tc.checkRsp(t, rsp)
 		})
 	}
 }
