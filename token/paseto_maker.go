@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"time"
 
 	"aidanwoods.dev/go-paseto"
@@ -14,15 +15,20 @@ type PasetoMaker struct {
 }
 
 // NewPasetoMaker creates a new PasetoMaker
-func NewPasetoMaker() Maker {
+func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	parser := paseto.NewParser()
 	parser.AddRule(paseto.NotExpired())
 	parser.AddRule(paseto.NotBeforeNbf())
 
-	return &PasetoMaker{
-		symmetricKey: paseto.NewV4SymmetricKey(),
-		parser:       &parser,
+	key, err := paseto.V4SymmetricKeyFromBytes([]byte(symmetricKey))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create v4 symmetric key: %w", err)
 	}
+
+	return &PasetoMaker{
+		symmetricKey: key,
+		parser:       &parser,
+	}, nil
 }
 
 // CreateToken creates a new token for a specific email and duration

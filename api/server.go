@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/token"
 	"github.com/DamianZhang/957-lending-platform/util"
@@ -16,15 +18,20 @@ type Server struct {
 }
 
 // NewServer creates a new HTTP server and set up routing
-func NewServer(config util.Config, borrowerService service.BorrowerService) *Server {
+func NewServer(config util.Config, borrowerService service.BorrowerService) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create token maker: %w", err)
+	}
+
 	server := &Server{
 		config:          config,
 		borrowerService: borrowerService,
-		tokenMaker:      token.NewPasetoMaker(),
+		tokenMaker:      tokenMaker,
 	}
 
 	server.setUpRoutes()
-	return server
+	return server, nil
 }
 
 func (server *Server) setUpRoutes() {

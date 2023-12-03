@@ -4,7 +4,6 @@ import (
 	"errors"
 	"time"
 
-	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
@@ -15,9 +14,9 @@ type JWTMaker struct {
 }
 
 // NewJWTMaker creates a new JWTMaker
-func NewJWTMaker() Maker {
+func NewJWTMaker(secretKey string) Maker {
 	return &JWTMaker{
-		secretKey: util.RandomString(32),
+		secretKey: secretKey,
 	}
 }
 

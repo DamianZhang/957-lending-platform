@@ -9,7 +9,8 @@ import (
 )
 
 func TestPasetoMaker(t *testing.T) {
-	maker := NewPasetoMaker()
+	maker, err := NewPasetoMaker(util.RandomString(32))
+	require.NoError(t, err)
 
 	email := util.RandomEmail()
 	duration := time.Minute
@@ -33,7 +34,8 @@ func TestPasetoMaker(t *testing.T) {
 }
 
 func TestExpiredPasetoToken(t *testing.T) {
-	maker := NewPasetoMaker()
+	maker, err := NewPasetoMaker(util.RandomString(32))
+	require.NoError(t, err)
 
 	token, payload, err := maker.CreateToken(util.RandomEmail(), -time.Minute)
 	require.NoError(t, err)
