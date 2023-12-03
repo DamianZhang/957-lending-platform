@@ -60,6 +60,23 @@ func TestGetUserByEmail(t *testing.T) {
 	require.WithinDuration(t, wanted.UpdatedAt, got.UpdatedAt, time.Second)
 }
 
+func TestGetUserByID(t *testing.T) {
+	wanted := createRandomUser(t)
+	got, err := testStore.GetUserByID(context.Background(), wanted.ID)
+	require.NoError(t, err)
+	require.NotEmpty(t, got)
+
+	require.Equal(t, wanted.ID, got.ID)
+	require.Equal(t, wanted.Email, got.Email)
+	require.Equal(t, wanted.HashedPassword, got.HashedPassword)
+	require.Equal(t, wanted.LineID, got.LineID)
+	require.Equal(t, wanted.Nickname, got.Nickname)
+	require.Equal(t, wanted.IsEmailVerified, got.IsEmailVerified)
+	require.Equal(t, wanted.Role, got.Role)
+	require.WithinDuration(t, wanted.CreatedAt, got.CreatedAt, time.Second)
+	require.WithinDuration(t, wanted.UpdatedAt, got.UpdatedAt, time.Second)
+}
+
 func TestGetUsers(t *testing.T) {
 	wanted := 5
 	for i := 0; i < wanted; i++ {

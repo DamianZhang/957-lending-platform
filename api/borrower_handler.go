@@ -8,6 +8,7 @@ import (
 	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type BorrowerHandler struct {
@@ -31,6 +32,7 @@ func (handler *BorrowerHandler) Route(app *fiber.App) {
 	router.Post("/sign_up", handler.SignUp)
 	router.Post("/sign_in", handler.SignIn)
 	router.Get("/refresh_token", handler.RefreshToken)
+	router.Get("/:id", authMiddleware(handler.tokenMaker), handler.GetBorrower)
 }
 
 func (handler *BorrowerHandler) SignUp(ctx *fiber.Ctx) error {
@@ -157,6 +159,43 @@ func (handler *BorrowerHandler) RefreshToken(ctx *fiber.Ctx) error {
 
 	rsp := RefreshTokenResponse{
 		AccessToken: accessToken,
+	}
+	return ctx.Status(fiber.StatusOK).JSON(rsp)
+}
+
+func (handler *BorrowerHandler) GetBorrower(ctx *fiber.Ctx) error {
+	id := ctx.Params("id")
+	borrowerID, err := uuid.Parse(id)
+	if err != nil {
+		errMsg := fmt.Sprintf("failed to parse borrower_id: %s", err.Error())
+		return errorResponse(ctx, fiber.StatusBadRequest, errMsg)
+	}
+
+	authPayload := ctx.Locals(authorizationPayloadKey).(*token.Payload)
+	if id != authPayload.UserID {
+		errMsg := "borrower doesn't belong to the authenticated user"
+		return errorResponse(ctx, fiber.StatusForbidden, errMsg)
+	}
+
+	input := &service.GetBorrowerByIDInput{
+		BorrowerID: borrowerID,
+	}
+
+	output, err := handler.borrowerService.GetBorrowerByID(ctx.Context(), input)
+	if err != nil {
+		apiError := FromServiceError(err)
+		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
+	}
+
+	rsp := GetBorrowerResponse{
+		ID:              output.Borrower.ID,
+		CreatedAt:       output.Borrower.CreatedAt,
+		UpdatedAt:       output.Borrower.UpdatedAt,
+		Email:           output.Borrower.Email,
+		LineID:          output.Borrower.LineID,
+		Nickname:        output.Borrower.Nickname,
+		IsEmailVerified: output.Borrower.IsEmailVerified,
+		Role:            output.Borrower.Role,
 	}
 	return ctx.Status(fiber.StatusOK).JSON(rsp)
 }

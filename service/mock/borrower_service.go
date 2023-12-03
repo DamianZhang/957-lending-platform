@@ -50,6 +50,21 @@ func (mr *MockBorrowerServiceMockRecorder) CreateSession(arg0, arg1 interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateSession", reflect.TypeOf((*MockBorrowerService)(nil).CreateSession), arg0, arg1)
 }
 
+// GetBorrowerByID mocks base method.
+func (m *MockBorrowerService) GetBorrowerByID(arg0 context.Context, arg1 *service.GetBorrowerByIDInput) (*service.GetBorrowerByIDOutput, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBorrowerByID", arg0, arg1)
+	ret0, _ := ret[0].(*service.GetBorrowerByIDOutput)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBorrowerByID indicates an expected call of GetBorrowerByID.
+func (mr *MockBorrowerServiceMockRecorder) GetBorrowerByID(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBorrowerByID", reflect.TypeOf((*MockBorrowerService)(nil).GetBorrowerByID), arg0, arg1)
+}
+
 // RefreshToken mocks base method.
 func (m *MockBorrowerService) RefreshToken(arg0 context.Context, arg1 *service.RefreshTokenInput) (*service.RefreshTokenOutput, error) {
 	m.ctrl.T.Helper()

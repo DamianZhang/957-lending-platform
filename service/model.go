@@ -5,6 +5,7 @@ import (
 
 	"github.com/DamianZhang/957-lending-platform/cache"
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
+	"github.com/google/uuid"
 )
 
 type SignUpInput struct {
@@ -43,4 +44,12 @@ type RefreshTokenInput struct {
 
 type RefreshTokenOutput struct {
 	Session cache.Session `json:"session"`
+}
+
+type GetBorrowerByIDInput struct {
+	BorrowerID uuid.UUID `json:"borrower_id"`
+}
+
+type GetBorrowerByIDOutput struct {
+	Borrower db.User `json:"borrower"`
 }

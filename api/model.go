@@ -1,5 +1,11 @@
 package api
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
@@ -29,4 +35,15 @@ type SignInResponse struct {
 
 type RefreshTokenResponse struct {
 	AccessToken string `json:"access_token"`
+}
+
+type GetBorrowerResponse struct {
+	ID              uuid.UUID `json:"id"`
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+	Email           string    `json:"email"`
+	LineID          string    `json:"line_id"`
+	Nickname        string    `json:"nickname"`
+	IsEmailVerified bool      `json:"is_email_verified"`
+	Role            string    `json:"role"`
 }
