@@ -81,8 +81,19 @@ func (handler *BorrowerHandler) SignIn(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusBadRequest, errMsg)
 	}
 
+	signInInput := &service.SignInInput{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+
+	signInOutput, err := handler.borrowerService.SignIn(ctx.Context(), signInInput)
+	if err != nil {
+		apiError := FromServiceError(err)
+		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
+	}
+
 	refreshToken, payload, err := handler.tokenMaker.CreateToken(
-		req.Email,
+		signInOutput.Borrower.ID.String(),
 		handler.config.RefreshTokenDuration,
 	)
 	if err != nil {
@@ -90,14 +101,13 @@ func (handler *BorrowerHandler) SignIn(ctx *fiber.Ctx) error {
 		return errorResponse(ctx, fiber.StatusUnauthorized, errMsg)
 	}
 
-	input := &service.SignInInput{
-		Email:     req.Email,
-		Password:  req.Password,
+	createSessionInput := &service.CreateSessionInput{
 		SessionID: payload.ID.String(),
 		ExpiresAt: payload.ExpiresAt,
+		Email:     signInOutput.Borrower.Email,
 	}
 
-	_, err = handler.borrowerService.SignIn(ctx.Context(), input)
+	_, err = handler.borrowerService.CreateSession(ctx.Context(), createSessionInput)
 	if err != nil {
 		apiError := FromServiceError(err)
 		return errorResponse(ctx, apiError.StatusCode, apiError.Message)
@@ -137,7 +147,7 @@ func (handler *BorrowerHandler) RefreshToken(ctx *fiber.Ctx) error {
 	}
 
 	accessToken, _, err := handler.tokenMaker.CreateToken(
-		payload.Email,
+		payload.UserID,
 		handler.config.AccessTokenDuration,
 	)
 	if err != nil {

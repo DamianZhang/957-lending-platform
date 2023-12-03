@@ -19,14 +19,22 @@ type SignUpOutput struct {
 }
 
 type SignInInput struct {
-	Email     string    `json:"email"`
-	Password  string    `json:"password"`
-	SessionID string    `json:"session_id"`
-	ExpiresAt time.Time `json:"expires_at"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 type SignInOutput struct {
 	Borrower db.User `json:"borrower"`
+}
+
+type CreateSessionInput struct {
+	SessionID string    `json:"session_id"`
+	ExpiresAt time.Time `json:"expires_at"`
+	Email     string    `json:"email"`
+}
+
+type CreateSessionOutput struct {
+	Session cache.Session `json:"session"`
 }
 
 type RefreshTokenInput struct {

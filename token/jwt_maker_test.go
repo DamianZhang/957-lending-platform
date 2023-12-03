@@ -12,13 +12,13 @@ import (
 func TestJWTMaker(t *testing.T) {
 	maker := NewJWTMaker(util.RandomString(32))
 
-	email := util.RandomEmail()
+	userID := util.RandomString(10)
 	duration := time.Minute
 
 	issuedAt := time.Now()
 	expiresAt := issuedAt.Add(duration)
 
-	token, payload, err := maker.CreateToken(email, duration)
+	token, payload, err := maker.CreateToken(userID, duration)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -28,7 +28,7 @@ func TestJWTMaker(t *testing.T) {
 	require.NotEmpty(t, payload)
 
 	require.NotZero(t, payload.ID)
-	require.Equal(t, email, payload.Email)
+	require.Equal(t, userID, payload.UserID)
 	require.WithinDuration(t, issuedAt, payload.IssuedAt, time.Second)
 	require.WithinDuration(t, expiresAt, payload.ExpiresAt, time.Second)
 }
@@ -36,7 +36,7 @@ func TestJWTMaker(t *testing.T) {
 func TestExpiredJWTToken(t *testing.T) {
 	maker := NewJWTMaker(util.RandomString(32))
 
-	token, payload, err := maker.CreateToken(util.RandomEmail(), -time.Minute)
+	token, payload, err := maker.CreateToken(util.RandomString(10), -time.Minute)
 	require.NoError(t, err)
 	require.NotEmpty(t, token)
 	require.NotEmpty(t, payload)
@@ -48,12 +48,12 @@ func TestExpiredJWTToken(t *testing.T) {
 }
 
 func TestInvalidJWTTokenAlgNone(t *testing.T) {
-	fakePayload, err := NewPayload(util.RandomEmail(), time.Minute)
+	fakePayload, err := NewPayload(util.RandomString(10), time.Minute)
 	require.NoError(t, err)
 
 	fakeClaims := MyCustomClaims{
-		ID:    fakePayload.ID,
-		Email: fakePayload.Email,
+		ID:     fakePayload.ID,
+		UserID: fakePayload.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(fakePayload.ExpiresAt),
 			IssuedAt:  jwt.NewNumericDate(fakePayload.IssuedAt),

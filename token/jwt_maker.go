@@ -21,21 +21,21 @@ func NewJWTMaker(secretKey string) Maker {
 }
 
 type MyCustomClaims struct {
-	ID    uuid.UUID `json:"id"`
-	Email string    `json:"email"`
+	ID     uuid.UUID `json:"id"`
+	UserID string    `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
-// CreateToken creates a new token for a specific email and duration
-func (maker *JWTMaker) CreateToken(email string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(email, duration)
+// CreateToken creates a new token for a specific userID and duration
+func (maker *JWTMaker) CreateToken(userID string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(userID, duration)
 	if err != nil {
 		return "", nil, err
 	}
 
 	claims := MyCustomClaims{
-		ID:    payload.ID,
-		Email: payload.Email,
+		ID:     payload.ID,
+		UserID: payload.UserID,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(payload.ExpiresAt),
 			IssuedAt:  jwt.NewNumericDate(payload.IssuedAt),
@@ -76,7 +76,7 @@ func (maker *JWTMaker) VerifyToken(token string) (*Payload, error) {
 
 	payload := &Payload{
 		ID:        claims.ID,
-		Email:     claims.Email,
+		UserID:    claims.UserID,
 		IssuedAt:  claims.IssuedAt.Time,
 		ExpiresAt: claims.ExpiresAt.Time,
 	}

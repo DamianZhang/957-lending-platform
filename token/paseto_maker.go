@@ -31,16 +31,16 @@ func NewPasetoMaker(symmetricKey string) (Maker, error) {
 	}, nil
 }
 
-// CreateToken creates a new token for a specific email and duration
-func (maker *PasetoMaker) CreateToken(email string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(email, duration)
+// CreateToken creates a new token for a specific userID and duration
+func (maker *PasetoMaker) CreateToken(userID string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(userID, duration)
 	if err != nil {
 		return "", nil, err
 	}
 
 	token := paseto.NewToken()
 	token.SetString("id", payload.ID.String())
-	token.SetString("email", payload.Email)
+	token.SetString("user_id", payload.UserID)
 	token.SetExpiration(payload.ExpiresAt)
 	token.SetIssuedAt(payload.IssuedAt)
 	token.SetNotBefore(payload.IssuedAt)
@@ -67,7 +67,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
-	email, err := parsedToken.GetString("email")
+	userID, err := parsedToken.GetString("user_id")
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
@@ -82,7 +82,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 
 	payload := &Payload{
 		ID:        uuid,
-		Email:     email,
+		UserID:    userID,
 		IssuedAt:  issuedAt,
 		ExpiresAt: expiresAt,
 	}
