@@ -102,6 +102,10 @@ func (svc *borrowerServiceImpl) RefreshToken(ctx context.Context, input *service
 func (svc *borrowerServiceImpl) GetBorrowerByID(ctx context.Context, input *service.GetBorrowerByIDInput) (*service.GetBorrowerByIDOutput, error) {
 	borrower, err := svc.borrowerStore.GetUserByID(ctx, input.BorrowerID)
 	if err != nil {
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return nil, service.NewError(service.ErrRecordNotFound, err)
+		}
+
 		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 

@@ -14,6 +14,7 @@ import (
 	"github.com/DamianZhang/957-lending-platform/service"
 	"github.com/DamianZhang/957-lending-platform/util"
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 )
 
@@ -353,12 +354,95 @@ func TestRefreshToken(t *testing.T) {
 	}
 }
 
+func TestGetBorrowerByID(t *testing.T) {
+	borrower, _ := expectedBorrower(t)
+
+	testCases := []struct {
+		name        string
+		input       *service.GetBorrowerByIDInput
+		buildStubs  func(store *mockdb.MockStore)
+		checkOutput func(output *service.GetBorrowerByIDOutput, err error)
+	}{
+		{
+			name: "OK",
+			input: &service.GetBorrowerByIDInput{
+				BorrowerID: borrower.ID,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByID(gomock.Any(), borrower.ID).
+					Times(1).
+					Return(borrower, nil)
+			},
+			checkOutput: func(output *service.GetBorrowerByIDOutput, err error) {
+				require.NoError(t, err)
+				require.Equal(t, borrower, output.Borrower)
+			},
+		},
+		{
+			name: "DBErrRecordNotFound",
+			input: &service.GetBorrowerByIDInput{
+				BorrowerID: borrower.ID,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByID(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, db.ErrRecordNotFound)
+			},
+			checkOutput: func(output *service.GetBorrowerByIDOutput, err error) {
+				var svcError service.Error
+				require.ErrorAs(t, err, &svcError)
+				require.ErrorIs(t, svcError.SvcErr(), service.ErrRecordNotFound)
+				require.Nil(t, output)
+			},
+		},
+		{
+			name: "DBErrConnDone",
+			input: &service.GetBorrowerByIDInput{
+				BorrowerID: borrower.ID,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByID(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, db.ErrConnDone)
+			},
+			checkOutput: func(output *service.GetBorrowerByIDOutput, err error) {
+				var svcError service.Error
+				require.ErrorAs(t, err, &svcError)
+				require.ErrorIs(t, svcError.SvcErr(), service.ErrInternalFailure)
+				require.Nil(t, output)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			borrowerService := NewBorrowerServiceImpl(store, nil)
+
+			output, err := borrowerService.GetBorrowerByID(context.Background(), tc.input)
+			tc.checkOutput(output, err)
+		})
+	}
+}
+
 func expectedBorrower(t *testing.T) (borrower db.User, password string) {
 	password = util.RandomString(6)
 	hashedPassword, err := util.HashPassword(password)
 	require.NoError(t, err)
 
+	id, err := uuid.NewRandom()
+	require.NoError(t, err)
+
 	borrower = db.User{
+		ID:       id,
 		Email:    util.RandomEmail(),
 		LineID:   util.RandomString(6),
 		Nickname: util.RandomString(6),
