@@ -78,7 +78,7 @@ func (svc *borrowerServiceImpl) CreateSession(ctx context.Context, input *servic
 
 	session, err := svc.borrowerCacher.CreateSession(ctx, arg)
 	if err != nil {
-		return nil, service.NewError(service.ErrUnauthorized, err)
+		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
 	output := &service.CreateSessionOutput{

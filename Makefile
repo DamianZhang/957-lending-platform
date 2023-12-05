@@ -37,6 +37,9 @@ sqlc:
 mock_db: sqlc
 	mockgen -package mockdb -destination db/mock/store.go github.com/DamianZhang/957-lending-platform/db/sqlc Store
 
+mock_cache:
+	mockgen -package mockcache -destination cache/mock/cacher.go github.com/DamianZhang/957-lending-platform/cache Cacher
+
 mock_svc:
 	mockgen -package mocksvc -destination service/mock/borrower_service.go github.com/DamianZhang/957-lending-platform/service BorrowerService
 
