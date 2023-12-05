@@ -2,6 +2,7 @@ package impl
 
 import (
 	"context"
+	"errors"
 
 	"github.com/DamianZhang/957-lending-platform/cache"
 	db "github.com/DamianZhang/957-lending-platform/db/sqlc"
@@ -50,7 +51,11 @@ func (svc *borrowerServiceImpl) SignUp(ctx context.Context, input *service.SignU
 func (svc *borrowerServiceImpl) SignIn(ctx context.Context, input *service.SignInInput) (*service.SignInOutput, error) {
 	borrower, err := svc.borrowerStore.GetUserByEmail(ctx, input.Email)
 	if err != nil {
-		return nil, service.NewError(service.ErrUnauthorized, err)
+		if errors.Is(err, db.ErrRecordNotFound) {
+			return nil, service.NewError(service.ErrRecordNotFound, err)
+		}
+
+		return nil, service.NewError(service.ErrInternalFailure, err)
 	}
 
 	err = util.CheckPassword(borrower.HashedPassword, input.Password)

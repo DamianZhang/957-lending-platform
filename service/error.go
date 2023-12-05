@@ -6,6 +6,7 @@ import "errors"
 var (
 	ErrInternalFailure = errors.New("internal failure")
 	ErrUnauthorized    = errors.New("unauthorized")
+	ErrRecordNotFound  = errors.New("record not found")
 )
 
 type Error struct {

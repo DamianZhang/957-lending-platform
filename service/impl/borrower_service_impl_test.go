@@ -2,7 +2,6 @@ package impl
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"reflect"
 	"testing"
@@ -111,7 +110,7 @@ func TestSignUp(t *testing.T) {
 				store.EXPECT().
 					CreateUser(gomock.Any(), gomock.Any()).
 					Times(1).
-					Return(db.User{}, sql.ErrConnDone)
+					Return(db.User{}, db.ErrConnDone)
 			},
 			checkOutput: func(output *service.SignUpOutput, err error) {
 				var svcError service.Error
@@ -133,6 +132,107 @@ func TestSignUp(t *testing.T) {
 			borrowerService := NewBorrowerServiceImpl(store, nil)
 
 			output, err := borrowerService.SignUp(context.Background(), tc.input)
+			tc.checkOutput(output, err)
+		})
+	}
+}
+
+func TestSignIn(t *testing.T) {
+	borrower, password := expectedBorrower(t)
+
+	testCases := []struct {
+		name        string
+		input       *service.SignInInput
+		buildStubs  func(store *mockdb.MockStore)
+		checkOutput func(output *service.SignInOutput, err error)
+	}{
+		{
+			name: "OK",
+			input: &service.SignInInput{
+				Email:    borrower.Email,
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByEmail(gomock.Any(), borrower.Email).
+					Times(1).
+					Return(borrower, nil)
+			},
+			checkOutput: func(output *service.SignInOutput, err error) {
+				require.NoError(t, err)
+				require.Equal(t, borrower, output.Borrower)
+			},
+		},
+		{
+			name: "DBErrRecordNotFound",
+			input: &service.SignInInput{
+				Email:    "RecordNotFound",
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByEmail(gomock.Any(), gomock.Eq("RecordNotFound")).
+					Times(1).
+					Return(db.User{}, db.ErrRecordNotFound)
+			},
+			checkOutput: func(output *service.SignInOutput, err error) {
+				var svcError service.Error
+				require.ErrorAs(t, err, &svcError)
+				require.ErrorIs(t, svcError.SvcErr(), service.ErrRecordNotFound)
+				require.Nil(t, output)
+			},
+		},
+		{
+			name: "DBErrConnDone",
+			input: &service.SignInInput{
+				Email:    borrower.Email,
+				Password: password,
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByEmail(gomock.Any(), gomock.Any()).
+					Times(1).
+					Return(db.User{}, db.ErrConnDone)
+			},
+			checkOutput: func(output *service.SignInOutput, err error) {
+				var svcError service.Error
+				require.ErrorAs(t, err, &svcError)
+				require.ErrorIs(t, svcError.SvcErr(), service.ErrInternalFailure)
+				require.Nil(t, output)
+			},
+		},
+		{
+			name: "WrongPassword",
+			input: &service.SignInInput{
+				Email:    borrower.Email,
+				Password: "WrongPassword",
+			},
+			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetUserByEmail(gomock.Any(), borrower.Email).
+					Times(1).
+					Return(borrower, nil)
+			},
+			checkOutput: func(output *service.SignInOutput, err error) {
+				var svcError service.Error
+				require.ErrorAs(t, err, &svcError)
+				require.ErrorIs(t, svcError.SvcErr(), service.ErrUnauthorized)
+				require.Nil(t, output)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			store := mockdb.NewMockStore(ctrl)
+			tc.buildStubs(store)
+
+			borrowerService := NewBorrowerServiceImpl(store, nil)
+
+			output, err := borrowerService.SignIn(context.Background(), tc.input)
 			tc.checkOutput(output, err)
 		})
 	}
